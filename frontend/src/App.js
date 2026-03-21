@@ -3,44 +3,44 @@ import { useState, useEffect } from "react"
 
 import Navbar from "./components/Navbar"
 
-import HomePage from "./pages/HomePage"
-import UploadPage from "./pages/UploadPage"
-import LoginPage from "./pages/LoginPage"
-import RegisterPage from "./pages/RegisterPage"
-import MyUploadsPage from "./pages/MyUploads"
+import HomePage       from "./pages/HomePage"
+import UploadPage     from "./pages/UploadPage"
+import LoginPage      from "./pages/LoginPage"
+import RegisterPage   from "./pages/RegisterPage"
+import ProfilePage    from "./pages/ProfilePage"
+import AdminDashboard from "./pages/AdminDashboard"
 
-function App(){
+function App() {
 
-const [token,setToken] = useState(null)
+  const [token, setToken] = useState(null)
 
-useEffect(()=>{
-setToken(localStorage.getItem("token"))
-},[])
+  useEffect(() => {
+    setToken(localStorage.getItem("token"))
+  }, [])
 
-return(
+  return (
+    <Router>
 
-<Router>
+      {token && <Navbar />}
 
-{token && <Navbar/>}
+      <Routes>
 
-<Routes>
+        <Route path="/" element={
+          token ? <Navigate to="/home" /> : <Navigate to="/login" />
+        } />
 
-<Route path="/" element={
-token ? <Navigate to="/home"/> : <Navigate to="/login"/>
-}/>
+        <Route path="/login"    element={<LoginPage setToken={setToken} />} />
+        <Route path="/register" element={<RegisterPage />} />
 
-<Route path="/login" element={<LoginPage setToken={setToken}/>}/>
-<Route path="/register" element={<RegisterPage/>}/>
+        <Route path="/home"    element={<HomePage />} />
+        <Route path="/upload"  element={<UploadPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/admin"   element={<AdminDashboard />} />
 
-<Route path="/home" element={<HomePage/>}/>
-<Route path="/upload" element={<UploadPage/>}/>
-<Route path="/my-uploads" element={<MyUploadsPage/>}/>
+      </Routes>
 
-</Routes>
-
-</Router>
-
-)
+    </Router>
+  )
 
 }
 

@@ -2,33 +2,26 @@ const express = require("express")
 const router = express.Router()
 
 const {
-uploadResource,
-getResources,
-searchResources,
-downloadResource,
-popularResources,
-rateResource,
-getMyResources,
-deleteResource
+  uploadResource,
+  getResources,
+  searchResources,
+  downloadResource,
+  popularResources,
+  rateResource,
+  getMyResources,
+  deleteResource
 } = require("../controllers/resourceController")
 
-const authMiddleware = require("../middleware/authMiddleware")
+const { protect } = require("../middleware/authMiddleware")
 const upload = require("../middleware/uploadMiddleware")
 
-router.post("/upload",authMiddleware,upload.single("file"),uploadResource)
-
-router.get("/",getResources)
-
-router.get("/search",searchResources)
-
-router.get("/download/:id",downloadResource)
-
-router.get("/popular",popularResources)
-
-router.post("/rate/:id",rateResource)
-
-router.get("/my",authMiddleware,getMyResources)
-
-router.delete("/:id",authMiddleware,deleteResource)
+router.get("/",                                    getResources)
+router.get("/search",                              searchResources)
+router.get("/popular",                             popularResources)
+router.get("/my",          protect,                getMyResources)
+router.get("/download/:id",                        downloadResource)
+router.post("/upload",     protect, upload.single("file"), uploadResource)
+router.post("/:id/rate",   protect,                rateResource)
+router.delete("/:id",      protect,                deleteResource)
 
 module.exports = router

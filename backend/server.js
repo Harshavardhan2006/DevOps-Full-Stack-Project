@@ -5,6 +5,7 @@ require("dotenv").config()
 const connectDB = require("./config/db")
 const authRoutes = require("./routes/authRoutes")
 const resourceRoutes = require("./routes/resourceRoutes")
+const adminRoutes = require("./routes/adminRoutes")
 
 const app = express()
 
@@ -13,17 +14,18 @@ app.use(express.json())
 
 connectDB()
 
-app.use("/api/auth", authRoutes)
+app.use("/api/auth",      authRoutes)
 app.use("/api/resources", resourceRoutes)
+app.use("/api/admin",     adminRoutes)
 
 app.use("/uploads", express.static("uploads"))
 
-app.get("/", (req,res)=>{
-res.send("Backend API Running")
+app.get("/", (req, res) => {
+  res.send("Backend API Running")
 })
 
 const PORT = process.env.PORT || 5000
 
-app.listen(PORT, ()=>{
-console.log(`Server running on port ${PORT}`)
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
 })
