@@ -128,10 +128,8 @@ exports.rateResource = async (req, res) => {
       return res.status(404).json({ message: "Resource not found" })
     }
 
-    // Initialize ratings array if missing
     if (!resource.ratings) resource.ratings = []
 
-    // Update existing rating or push new one
     const existingIndex = resource.ratings.findIndex(
       r => r.user.toString() === req.user.id.toString()
     )
@@ -142,7 +140,6 @@ exports.rateResource = async (req, res) => {
       resource.ratings.push({ user: req.user.id, stars })
     }
 
-    // Recalculate average and count
     const total = resource.ratings.reduce((sum, r) => sum + r.stars, 0)
     resource.avgRating   = parseFloat((total / resource.ratings.length).toFixed(1))
     resource.ratingCount = resource.ratings.length
@@ -188,7 +185,11 @@ exports.deleteResource = async (req, res) => {
       return res.status(404).json({ message: "Resource not found" })
     }
 
-    if (resource.uploadedBy.toString() !== req.user.id) {
+    // Admins can delete any resource; students can only delete their own
+    const isAdmin = req.user.role === "admin"
+    const isOwner = resource.uploadedBy.toString() === req.user.id.toString()
+
+    if (!isAdmin && !isOwner) {
       return res.status(403).json({ message: "Not authorized" })
     }
 

@@ -24,20 +24,23 @@ function StarRating({ resourceId, existingRating = 0, avgRating = 0, ratingCount
   const [selected,  setSelected]  = useState(existingRating)
   const [submitted, setSubmitted] = useState(!!existingRating)
   const [loading,   setLoading]   = useState(false)
+  const [error,     setError]     = useState("")
 
   const handleSubmit = async () => {
     if (!selected) return
     setLoading(true)
+    setError("")
     try {
-      const token = localStorage.getItem("token")
-      await API.post(`/resources/${resourceId}/rate`,
-        { stars: selected },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+      const res = await API.post(`/resources/${resourceId}/rate`, { stars: selected })
       setSubmitted(true)
-      if (onRated) onRated(selected)
-    } catch (err) { console.log(err) }
-    finally { setLoading(false) }
+      // FIX: pass updated avg and count back to parent so card updates without refetch
+      if (onRated) onRated(res.data.avgRating, res.data.ratingCount)
+    } catch (err) {
+      console.log(err)
+      setError("Failed to submit rating. Please try again.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   const display = hover || selected
@@ -63,7 +66,14 @@ function StarRating({ resourceId, existingRating = 0, avgRating = 0, ratingCount
               </span>
             ))}
           </div>
-          <button className="sr-submit" onClick={handleSubmit} disabled={!selected || loading}>
+          {error && (
+            <span style={{ fontSize: "12px", color: "#f87171" }}>{error}</span>
+          )}
+          <button
+            className="sr-submit"
+            onClick={handleSubmit}
+            disabled={!selected || loading}
+          >
             {loading ? "Saving…" : "Submit rating"}
           </button>
         </div>

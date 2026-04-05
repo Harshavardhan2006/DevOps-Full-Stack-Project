@@ -12,7 +12,9 @@ function Navbar() {
 
   useEffect(() => {
     fetchUser()
-    const handler = (e) => { if (dropRef.current && !dropRef.current.contains(e.target)) setDdOpen(false) }
+    const handler = (e) => {
+      if (dropRef.current && !dropRef.current.contains(e.target)) setDdOpen(false)
+    }
     document.addEventListener("mousedown", handler)
     return () => document.removeEventListener("mousedown", handler)
   }, [])
@@ -21,17 +23,22 @@ function Navbar() {
     try {
       const token = localStorage.getItem("token")
       if (!token) return
-      const res = await API.get("/auth/me", { headers: { Authorization: `Bearer ${token}` } })
+      const res = await API.get("/auth/me")
       setUser(res.data)
     } catch (err) { console.log(err) }
   }
 
-  const logout   = () => { localStorage.removeItem("token"); window.location.href = "/login" }
-  const isActive = (path) => path === "/" ? location.pathname === "/" : location.pathname.startsWith(path)
+  const logout = () => {
+    localStorage.removeItem("token")
+    window.location.href = "/"
+  }
+
+  const isActive = (path) => location.pathname === path
   const initials = user?.name ? user.name.trim()[0].toUpperCase() : "?"
 
+  // FIX: Home nav item points to /home, not /
   const navItems = [
-    { to: "/",       label: "Home"   },
+    { to: "/home",   label: "Home"   },
     { to: "/upload", label: "Upload" },
   ]
 
@@ -39,7 +46,7 @@ function Navbar() {
     <nav className="nav-root">
       <div className="nav-inner">
 
-        <Link to="/" className="nav-logo">
+        <Link to="/home" className="nav-logo">
           <div className="nav-logo-icon">
             <svg width="22" height="22" viewBox="0 0 48 48" fill="none">
               <path d="M24 14C24 14 16 11 10 13V35C16 33 24 36 24 36C24 36 32 33 38 35V13C32 11 24 14 24 14Z" fill="white" fillOpacity="0.2"/>
@@ -106,22 +113,39 @@ function Navbar() {
           )}
         </div>
 
-        <button className={`nav-hamburger${open ? " open" : ""}`} onClick={() => setOpen(!open)} aria-label="Toggle menu">
+        <button
+          className={`nav-hamburger${open ? " open" : ""}`}
+          onClick={() => setOpen(!open)}
+          aria-label="Toggle menu"
+        >
           <span /><span /><span />
         </button>
       </div>
 
       <div className={`nav-mobile${open ? " open" : ""}`}>
         {navItems.map(({ to, label }) => (
-          <Link key={to} to={to} className={`nav-link${isActive(to) ? " active" : ""}`} onClick={() => setOpen(false)}>
+          <Link
+            key={to}
+            to={to}
+            className={`nav-link${isActive(to) ? " active" : ""}`}
+            onClick={() => setOpen(false)}
+          >
             {label}
           </Link>
         ))}
-        <Link to="/profile" className={`nav-link${isActive("/profile") ? " active" : ""}`} onClick={() => setOpen(false)}>
+        <Link
+          to="/profile"
+          className={`nav-link${isActive("/profile") ? " active" : ""}`}
+          onClick={() => setOpen(false)}
+        >
           My Profile
         </Link>
         {user?.role === "admin" && (
-          <Link to="/admin" className={`nav-link${isActive("/admin") ? " active" : ""}`} onClick={() => setOpen(false)}>
+          <Link
+            to="/admin"
+            className={`nav-link${isActive("/admin") ? " active" : ""}`}
+            onClick={() => setOpen(false)}
+          >
             Admin Dashboard
           </Link>
         )}

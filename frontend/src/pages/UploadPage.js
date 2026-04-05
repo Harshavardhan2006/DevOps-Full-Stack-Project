@@ -17,21 +17,31 @@ function UploadPage() {
 
   const handleUpload = async (e) => {
     e.preventDefault()
+
+    // FIX: validate file is selected before submitting
+    if (!file) {
+      setError("Please select a file to upload.")
+      return
+    }
+
     setLoading(true)
     setError("")
+
     try {
-      const token = localStorage.getItem("token")
       const formData = new FormData()
-      formData.append("title", title)
+      formData.append("title",       title)
       formData.append("description", description)
-      formData.append("subject", subject)
-      formData.append("type", type)
-      formData.append("file", file)
-      await API.post("/resources/upload", formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      navigate("/")
+      formData.append("subject",     subject)
+      formData.append("type",        type)
+      formData.append("file",        file)
+
+      await API.post("/resources/upload", formData)
+
+      // FIX: navigate to /home not / (which is the landing page)
+      navigate("/home")
+
     } catch (err) {
+      console.log(err)
       setError("Upload failed. Please check your inputs and try again.")
     } finally {
       setLoading(false)
@@ -92,7 +102,12 @@ function UploadPage() {
               <label className="up-label">Subject</label>
               <div className="up-input-wrap">
                 <span className="up-input-icon">📚</span>
-                <select className="up-select" value={subject} onChange={e => setSubject(e.target.value)} required>
+                <select
+                  className="up-select"
+                  value={subject}
+                  onChange={e => setSubject(e.target.value)}
+                  required
+                >
                   <option value="">Select subject</option>
                   <option>Data Structures</option>
                   <option>Operating Systems</option>
@@ -109,7 +124,12 @@ function UploadPage() {
               <label className="up-label">Resource type</label>
               <div className="up-input-wrap">
                 <span className="up-input-icon">🗂</span>
-                <select className="up-select" value={type} onChange={e => setType(e.target.value)} required>
+                <select
+                  className="up-select"
+                  value={type}
+                  onChange={e => setType(e.target.value)}
+                  required
+                >
                   <option value="">Select type</option>
                   <option>Notes</option>
                   <option>Assignment</option>
@@ -125,11 +145,20 @@ function UploadPage() {
             className={`up-dropzone${dragging ? " active" : ""}`}
             onDragOver={e => { e.preventDefault(); setDragging(true) }}
             onDragLeave={() => setDragging(false)}
-            onDrop={e => { e.preventDefault(); setDragging(false); setFile(e.dataTransfer.files[0]) }}
+            onDrop={e => {
+              e.preventDefault()
+              setDragging(false)
+              if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0])
+            }}
           >
-            <input type="file" onChange={e => setFile(e.target.files[0])} required />
+            <input
+              type="file"
+              onChange={e => setFile(e.target.files[0] || null)}
+            />
             <div className="up-dropzone-icon">📁</div>
-            <div className="up-dropzone-text">{file ? "File selected" : "Drag & drop or click to browse"}</div>
+            <div className="up-dropzone-text">
+              {file ? "File selected" : "Drag & drop or click to browse"}
+            </div>
             <div className="up-dropzone-sub">PDF, DOC, PPT, images up to 50MB</div>
             {file && <div className="up-dropzone-file">✓ {file.name}</div>}
           </div>

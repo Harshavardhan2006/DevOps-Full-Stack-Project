@@ -7,15 +7,16 @@ import "../styles/styles.css"
 const SUBJECTS = ["All","Data Structures","Operating Systems","Algorithms","Computer Networks","Database Systems","Software Engineering","Artificial Intelligence"]
 const TYPES    = ["All","Notes","Assignment","Question Paper"]
 const SORTS    = [
-  { value: "newest",    label: "Newest first" },
-  { value: "oldest",    label: "Oldest first" },
+  { value: "newest",    label: "Newest first"   },
+  { value: "oldest",    label: "Oldest first"   },
   { value: "downloads", label: "Most downloaded" },
-  { value: "rating",    label: "Highest rated" },
-  { value: "title",     label: "A → Z" },
+  { value: "rating",    label: "Highest rated"  },
+  { value: "title",     label: "A → Z"          },
 ]
 
 function HomePage() {
   const [resources,  setResources]  = useState([])
+  const [loading,    setLoading]    = useState(true)
   const [search,     setSearch]     = useState("")
   const [subject,    setSubject]    = useState("All")
   const [type,       setType]       = useState("All")
@@ -25,21 +26,35 @@ function HomePage() {
   useEffect(() => { fetchResources() }, [])
 
   const fetchResources = async () => {
+    setLoading(true)
     try {
       const res = await API.get("/resources")
       setResources(res.data)
-    } catch (err) { console.log(err) }
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const hasFilters = search || subject !== "All" || type !== "All" || sort !== "newest"
-  const clearFilters = () => { setSearch(""); setSubject("All"); setType("All"); setSort("newest") }
+
+  const clearFilters = () => {
+    setSearch("")
+    setSubject("All")
+    setType("All")
+    setSort("newest")
+  }
 
   const filtered = useMemo(() => {
     let list = resources.filter(r => {
       const q = search.toLowerCase()
-      const matchSearch  = !q || r.title?.toLowerCase().includes(q) || r.description?.toLowerCase().includes(q) || r.subject?.toLowerCase().includes(q)
+      const matchSearch  = !q
+        || r.title?.toLowerCase().includes(q)
+        || r.description?.toLowerCase().includes(q)
+        || r.subject?.toLowerCase().includes(q)
       const matchSubject = subject === "All" || r.subject === subject
-      const matchType    = type === "All"    || r.type === type
+      const matchType    = type    === "All" || r.type    === type
       return matchSearch && matchSubject && matchType
     })
     return [...list].sort((a, b) => {
@@ -47,10 +62,20 @@ function HomePage() {
       if (sort === "oldest")    return new Date(a.createdAt) - new Date(b.createdAt)
       if (sort === "downloads") return (b.downloads || 0) - (a.downloads || 0)
       if (sort === "rating")    return (b.avgRating  || 0) - (a.avgRating  || 0)
-      if (sort === "title")     return a.title?.localeCompare(b.title)
+      if (sort === "title")     return (a.title || "").localeCompare(b.title || "")
       return 0
     })
   }, [resources, search, subject, type, sort])
+
+  // After rating, update the resource in state without a full refetch
+  const handleRated = (resourceId, newAvg, newCount) => {
+    setResources(prev => prev.map(r =>
+      r._id === resourceId
+        ? { ...r, avgRating: newAvg, ratingCount: newCount }
+        : r
+    ))
+    setRatingOpen(null)
+  }
 
   return (
     <div className="hp-root">
@@ -83,7 +108,13 @@ function HomePage() {
             <span className="hp-filter-label">Subject</span>
             <div className="hp-filter-chips">
               {SUBJECTS.map(s => (
-                <button key={s} className={`hp-chip${subject === s ? " active" : ""}`} onClick={() => setSubject(s)}>{s}</button>
+                <button
+                  key={s}
+                  className={`hp-chip${subject === s ? " active" : ""}`}
+                  onClick={() => setSubject(s)}
+                >
+                  {s}
+                </button>
               ))}
             </div>
           </div>
@@ -92,7 +123,13 @@ function HomePage() {
             <span className="hp-filter-label">Type</span>
             <div className="hp-filter-chips">
               {TYPES.map(t => (
-                <button key={t} className={`hp-chip${type === t ? " active" : ""}`} onClick={() => setType(t)}>{t}</button>
+                <button
+                  key={t}
+                  className={`hp-chip${type === t ? " active" : ""}`}
+                  onClick={() => setType(t)}
+                >
+                  {t}
+                </button>
               ))}
             </div>
           </div>
@@ -100,40 +137,69 @@ function HomePage() {
       </div>
 
       <div className="hp-results-info">
-        <span className="hp-results-count">Showing <strong>{filtered.length}</strong> of {resources.length} resources</span>
-        {hasFilters && <button className="hp-clear-btn" onClick={clearFilters}>✕ Clear filters</button>}
+        <span className="hp-results-count">
+          {loading
+            ? "Loading resources..."
+            : <>Showing <strong>{filtered.length}</strong> of {resources.length} resources</>
+          }
+        </span>
+        {hasFilters && !loading && (
+          <button className="hp-clear-btn" onClick={clearFilters}>✕ Clear filters</button>
+        )}
       </div>
 
       <div className="hp-grid">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="hp-empty">
+            <div className="hp-empty-icon">⏳</div>
+            <p>Loading resources...</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="hp-empty">
             <div className="hp-empty-icon">🗂️</div>
             <p>No resources found. Try adjusting your search or filters.</p>
           </div>
-        ) : filtered.map(r => (
-          <div className="hp-card" key={r._id}>
-            <div className="hp-card-top">
-              <span className="hp-card-subject">{r.subject}</span>
-              {r.type && <span className="hp-card-type">{r.type}</span>}
-            </div>
-            <h3>{r.title}</h3>
-            <p className="hp-card-desc">{r.description}</p>
+        ) : (
+          filtered.map(r => (
+            <div className="hp-card" key={r._id}>
+              <div className="hp-card-top">
+                <span className="hp-card-subject">{r.subject}</span>
+                {r.type && <span className="hp-card-type">{r.type}</span>}
+              </div>
+              <h3>{r.title}</h3>
+              <p className="hp-card-desc">{r.description}</p>
 
-            <div className="hp-card-rating">
-              <StarDisplay avg={r.avgRating || 0} count={r.ratingCount || 0} />
-              <button className="hp-rating-toggle" onClick={() => setRatingOpen(r)}>★ Rate this</button>
-            </div>
+              <div className="hp-card-rating">
+                <StarDisplay avg={r.avgRating || 0} count={r.ratingCount || 0} />
+                <button className="hp-rating-toggle" onClick={() => setRatingOpen(r)}>
+                  ★ Rate this
+                </button>
+              </div>
 
-            <div className="hp-card-meta">
-              <span>⬇️ {r.downloads || 0}</span>
-              <span>👤 {r.uploadedBy?.name}</span>
+              <div className="hp-card-meta">
+                <span>⬇️ {r.downloads || 0}</span>
+                {/* FIX: safe access — uploadedBy may be null if user was deleted */}
+                <span>👤 {r.uploadedBy?.name || "Unknown"}</span>
+              </div>
+              <div className="hp-card-actions">
+                <a
+                  className="hp-btn hp-btn-view"
+                  href={`http://localhost:5000/uploads/${r.fileUrl}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  👁 View
+                </a>
+                <a
+                  className="hp-btn hp-btn-dl"
+                  href={`http://localhost:5000/api/resources/download/${r._id}`}
+                >
+                  ⬇ Download
+                </a>
+              </div>
             </div>
-            <div className="hp-card-actions">
-              <a className="hp-btn hp-btn-view" href={`http://localhost:5000/uploads/${r.fileUrl}`} target="_blank" rel="noreferrer">👁 View</a>
-              <a className="hp-btn hp-btn-dl"   href={`http://localhost:5000/api/resources/download/${r._id}`}>⬇ Download</a>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {ratingOpen && (
@@ -145,9 +211,11 @@ function HomePage() {
               resourceId={ratingOpen._id}
               avgRating={ratingOpen.avgRating || 0}
               ratingCount={ratingOpen.ratingCount || 0}
-              onRated={() => { fetchResources(); setRatingOpen(null) }}
+              onRated={(avg, count) => handleRated(ratingOpen._id, avg, count)}
             />
-            <button className="hp-rating-close" onClick={() => setRatingOpen(null)}>Close</button>
+            <button className="hp-rating-close" onClick={() => setRatingOpen(null)}>
+              Close
+            </button>
           </div>
         </div>
       )}

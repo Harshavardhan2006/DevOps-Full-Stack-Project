@@ -8,41 +8,45 @@ function ProfilePage() {
   const [resources, setResources] = useState([])
   const [confirmId, setConfirmId] = useState(null)
   const [deleting,  setDeleting]  = useState(false)
+  // FIX: track loading so we don't show "No uploads" while still fetching
+  const [loading,   setLoading]   = useState(true)
 
   useEffect(() => {
-    fetchProfile()
-    fetchUploads()
+    fetchAll()
   }, [])
 
-  const fetchProfile = async () => {
+  const fetchAll = async () => {
+    setLoading(true)
     try {
-      const token = localStorage.getItem("token")
-      const res = await API.get("/auth/me", { headers: { Authorization: `Bearer ${token}` } })
-      setUser(res.data)
-    } catch (err) { console.log(err) }
-  }
-
-  const fetchUploads = async () => {
-    try {
-      const token = localStorage.getItem("token")
-      const res = await API.get("/resources/my", { headers: { Authorization: `Bearer ${token}` } })
-      setResources(res.data)
-    } catch (err) { console.log(err) }
+      const [userRes, uploadsRes] = await Promise.all([
+        API.get("/auth/me"),
+        API.get("/resources/my"),
+      ])
+      setUser(userRes.data)
+      setResources(uploadsRes.data)
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const deleteResource = async () => {
     if (!confirmId) return
     setDeleting(true)
     try {
-      const token = localStorage.getItem("token")
-      await API.delete(`/resources/${confirmId}`, { headers: { Authorization: `Bearer ${token}` } })
-      setResources(resources.filter(r => r._id !== confirmId))
+      await API.delete(`/resources/${confirmId}`)
+      setResources(prev => prev.filter(r => r._id !== confirmId))
       setConfirmId(null)
-    } catch (err) { console.log(err) }
-    finally { setDeleting(false) }
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setDeleting(false)
+    }
   }
 
   const totalDownloads = resources.reduce((sum, r) => sum + (r.downloads || 0), 0)
+  // FIX: guard against user being null during load
   const initials = user?.name ? user.name.trim()[0].toUpperCase() : "?"
 
   return (
@@ -55,7 +59,8 @@ function ProfilePage() {
         <div className="pp-avatar-row">
           <div className="pp-avatar">{initials}</div>
           <div className="pp-name-block">
-            <div className="pp-name">{user?.name || "Loading..."}</div>
+            {/* FIX: show skeleton-like text while loading */}
+            <div className="pp-name">{user?.name || (loading ? "Loading..." : "Unknown")}</div>
             <div className="pp-email">{user?.email || ""}</div>
           </div>
         </div>
@@ -76,7 +81,12 @@ function ProfilePage() {
 
         <div className="pp-section-title">My uploaded resources</div>
 
-        {resources.length === 0 ? (
+        {/* FIX: only show empty state after loading is complete */}
+        {loading ? (
+          <div className="pp-empty">
+            <div className="pp-empty-sub">Loading your resources...</div>
+          </div>
+        ) : resources.length === 0 ? (
           <div className="pp-empty">
             <div className="pp-empty-icon">🗂️</div>
             <div className="pp-empty-title">No uploads yet</div>
@@ -94,12 +104,29 @@ function ProfilePage() {
                 <h4>{r.title}</h4>
                 <p className="pp-card-desc">{r.description}</p>
                 <div className="pp-card-meta">
-                  <span>⬇️ {r.downloads} downloads</span>
+                  <span>⬇️ {r.downloads || 0} downloads</span>
                 </div>
                 <div className="pp-card-actions">
-                  <a className="pp-btn pp-btn-view" href={`http://localhost:5000/uploads/${r.fileUrl}`} target="_blank" rel="noreferrer">👁 View</a>
-                  <a className="pp-btn pp-btn-dl"   href={`http://localhost:5000/api/resources/download/${r._id}`}>⬇ Download</a>
-                  <button className="pp-btn pp-btn-del" onClick={() => setConfirmId(r._id)}>🗑</button>
+                  <a
+                    className="pp-btn pp-btn-view"
+                    href={`http://localhost:5000/uploads/${r.fileUrl}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    👁 View
+                  </a>
+                  <a
+                    className="pp-btn pp-btn-dl"
+                    href={`http://localhost:5000/api/resources/download/${r._id}`}
+                  >
+                    ⬇ Download
+                  </a>
+                  <button
+                    className="pp-btn pp-btn-del"
+                    onClick={() => setConfirmId(r._id)}
+                  >
+                    🗑
+                  </button>
                 </div>
               </div>
             ))}
@@ -112,10 +139,24 @@ function ProfilePage() {
           <div className="pp-confirm" onClick={e => e.stopPropagation()}>
             <div className="pp-confirm-icon">🗑️</div>
             <div className="pp-confirm-title">Delete resource?</div>
-            <div className="pp-confirm-sub">This action cannot be undone. The file will be permanently removed.</div>
+            <div className="pp-confirm-sub">
+              This action cannot be undone. The file will be permanently removed.
+            </div>
             <div className="pp-confirm-btns">
-              <button className="pp-confirm-cancel" onClick={() => setConfirmId(null)}>Cancel</button>
-              <button className="pp-confirm-del" onClick={deleteResource} disabled={deleting}>{deleting ? "Deleting…" : "Yes, delete"}</button>
+              <button
+                className="pp-confirm-cancel"
+                onClick={() => setConfirmId(null)}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                className="pp-confirm-del"
+                onClick={deleteResource}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting…" : "Yes, delete"}
+              </button>
             </div>
           </div>
         </div>
