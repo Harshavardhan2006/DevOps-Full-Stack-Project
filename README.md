@@ -92,5 +92,3 @@ SudentResourcePlatform/
 **Frontend:**
 
 - react, react-dom, react-router-dom, axios, @testing-library, web-vitals
-
----
