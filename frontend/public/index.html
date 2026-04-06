@@ -3,15 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0d1117" />
+    <meta name="theme-color" content="#ffffff" />
     <meta name="description" content="Student Resource Sharing Platform — browse, upload, and download study notes, assignments, and question papers shared by students." />
 
-    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
-    <!-- Fonts: Playfair Display + DM Sans (used across all pages) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -19,35 +17,25 @@
       rel="stylesheet"
     />
 
-    <!-- Base styles -->
     <style>
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
       html { scroll-behavior: smooth; }
-
       body {
         font-family: 'DM Sans', sans-serif;
-        background: #0d1117;
-        color: #e6edf3;
+        background: #f5f7fa;
+        color: #1a1f2e;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         min-height: 100vh;
       }
-
       #root { min-height: 100vh; }
-
-      /* Scrollbar */
       ::-webkit-scrollbar { width: 6px; }
-      ::-webkit-scrollbar-track { background: #0d1117; }
-      ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
-      ::-webkit-scrollbar-thumb:hover { background: #484f58; }
-
-      /* Selection */
-      ::selection { background: rgba(79,142,247,0.3); color: #e6edf3; }
-
-      /* Remove default link/button outlines — keep for accessibility */
+      ::-webkit-scrollbar-track { background: #f0f2f5; }
+      ::-webkit-scrollbar-thumb { background: #c8cdd8; border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: #a0a8b8; }
+      ::selection { background: rgba(79,118,247,0.18); color: #1a1f2e; }
       a:focus-visible, button:focus-visible {
-        outline: 2px solid #4f8ef7;
+        outline: 2px solid #4f76f7;
         outline-offset: 2px;
         border-radius: 4px;
       }

@@ -81,7 +81,7 @@ function HomePage() {
     <div className="hp-root">
 
       <div className="hp-hero">
-        <div className="hp-hero-badge">📚 Open Knowledge Hub</div>
+        <div className="hp-hero-badge">Open Knowledge Hub</div>
         <h1>Knowledge grows when shared, and shines brightest when accessible to all.</h1>
         <p>Browse, preview, and download study resources across all core CS subjects.</p>
       </div>
