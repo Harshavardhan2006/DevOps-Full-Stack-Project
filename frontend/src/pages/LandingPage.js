@@ -87,7 +87,7 @@ function LandingPage() {
         <div className="land-hero-inner">
           <div className="land-hero-badge">
             <span className="land-hero-badge-dot" />
-            Open for all CS students
+            Open for all students
           </div>
           <h1 className="land-hero-title">
             Knowledge grows<br />when shared
@@ -120,7 +120,7 @@ function LandingPage() {
         <div className="land-section-inner">
           <div className="land-section-label">Features</div>
           <h2 className="land-section-title">Everything you need to study smarter</h2>
-          <p className="land-section-sub">Built specifically for college CS students to share and discover academic materials.</p>
+          <p className="land-section-sub">Built specifically for college students to share and discover academic materials.</p>
           <div className="land-features-grid">
             {features.map(f => (
               <div className="land-feature-card" key={f.title}>
