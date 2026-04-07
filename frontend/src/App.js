@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
-import { useState } from "react"
+import { useState, useEffect, createContext, useContext } from "react"
 
 import Navbar         from "./components/Navbar"
 import LandingPage    from "./pages/LandingPage"
@@ -10,35 +10,58 @@ import RegisterPage   from "./pages/RegisterPage"
 import ProfilePage    from "./pages/ProfilePage"
 import AdminDashboard from "./pages/AdminDashboard"
 
+// ── Theme context ────────────────────────────────────────────
+export const ThemeContext = createContext({
+  theme: "light",
+  toggleTheme: () => {},
+})
+export const useTheme = () => useContext(ThemeContext)
+
 function App() {
 
-  // Read token directly from localStorage as initial state — no useEffect needed.
-  // This means on refresh the token is available immediately, preventing the
-  // brief null → redirect flash that was kicking logged-in users to /login.
+  // ── Auth ─────────────────────────────────────────────────
   const [token, setToken] = useState(() => localStorage.getItem("token"))
 
+  // ── Theme ─────────────────────────────────────────────────
+  // Initialise from localStorage; fall back to system preference
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem("theme")
+    if (saved === "light" || saved === "dark") return saved
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+  })
+
+  // Apply [data-theme] to <html> whenever theme changes
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme)
+    localStorage.setItem("theme", theme)
+  }, [theme])
+
+  const toggleTheme = () =>
+    setTheme(prev => (prev === "light" ? "dark" : "light"))
+
   return (
-    <Router>
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      <Router>
 
-      {token && <Navbar />}
+        {token && <Navbar />}
 
-      <Routes>
+        <Routes>
 
-        <Route path="/" element={token ? <Navigate to="/home" /> : <LandingPage />} />
+          <Route path="/" element={token ? <Navigate to="/home" /> : <LandingPage />} />
 
-        <Route path="/login"    element={<LoginPage setToken={setToken} />} />
-        <Route path="/register" element={<RegisterPage />} />
+          <Route path="/login"    element={<LoginPage setToken={setToken} />} />
+          <Route path="/register" element={<RegisterPage />} />
 
-        <Route path="/home"    element={token ? <HomePage />       : <Navigate to="/login" />} />
-        <Route path="/upload"  element={token ? <UploadPage />     : <Navigate to="/login" />} />
-        <Route path="/profile" element={token ? <ProfilePage />    : <Navigate to="/login" />} />
-        <Route path="/admin"   element={token ? <AdminDashboard /> : <Navigate to="/login" />} />
+          <Route path="/home"    element={token ? <HomePage />       : <Navigate to="/login" />} />
+          <Route path="/upload"  element={token ? <UploadPage />     : <Navigate to="/login" />} />
+          <Route path="/profile" element={token ? <ProfilePage />    : <Navigate to="/login" />} />
+          <Route path="/admin"   element={token ? <AdminDashboard /> : <Navigate to="/login" />} />
 
-      </Routes>
+        </Routes>
 
-    </Router>
+      </Router>
+    </ThemeContext.Provider>
   )
-
 }
 
 export default App

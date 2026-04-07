@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react"
 import { Link, useLocation } from "react-router-dom"
 import API from "../services/api"
-import "../styles/styles.css"
+import { useTheme } from "../App"
+import "../styles/styles.css"   // ← renamed from styles.css
 
 function Navbar() {
   const [open,   setOpen]   = useState(false)
@@ -9,6 +10,8 @@ function Navbar() {
   const [user,   setUser]   = useState(null)
   const dropRef  = useRef(null)
   const location = useLocation()
+
+  const { theme, toggleTheme } = useTheme()
 
   useEffect(() => {
     fetchUser()
@@ -36,7 +39,6 @@ function Navbar() {
   const isActive = (path) => location.pathname === path
   const initials = user?.name ? user.name.trim()[0].toUpperCase() : "?"
 
-  // FIX: Home nav item points to /home, not /
   const navItems = [
     { to: "/home",   label: "Home"   },
     { to: "/upload", label: "Upload" },
@@ -74,6 +76,36 @@ function Navbar() {
         </div>
 
         <div className="nav-right" ref={dropRef}>
+
+          {/* ── Theme toggle ── */}
+          <button
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+            title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+          >
+            {/* Sun icon */}
+            <span className="icon-sun" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1"  x2="12" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22"   x2="5.64" y2="5.64"/>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1"  y1="12" x2="3"  y2="12"/>
+                <line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+              </svg>
+            </span>
+            {/* Moon icon */}
+            <span className="icon-moon" aria-hidden="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+            </span>
+          </button>
+
           <div className="nav-avatar-btn" onClick={() => setDdOpen(!ddOpen)}>
             {initials}
           </div>
@@ -89,17 +121,17 @@ function Navbar() {
               </div>
 
               <Link to="/profile" className="nav-dd-item" onClick={() => setDdOpen(false)}>
-                <span className="nav-dd-icon"></span> My Profile
+                <span className="nav-dd-icon">👤</span> My Profile
               </Link>
               <Link to="/upload" className="nav-dd-item" onClick={() => setDdOpen(false)}>
-                <span className="nav-dd-icon"></span> Upload Resource
+                <span className="nav-dd-icon">📤</span> Upload Resource
               </Link>
 
               {user?.role === "admin" && (
                 <>
                   <div className="nav-dd-divider" />
                   <Link to="/admin" className="nav-dd-item" onClick={() => setDdOpen(false)}>
-                    <span className="nav-dd-icon"></span> Admin Dashboard
+                    <span className="nav-dd-icon">⚙️</span> Admin Dashboard
                     <span className="nav-dd-admin-badge">Admin</span>
                   </Link>
                 </>
@@ -149,6 +181,16 @@ function Navbar() {
             Admin Dashboard
           </Link>
         )}
+
+        {/* Mobile theme toggle row */}
+        <button
+          className="nav-mobile-logout"
+          style={{ color: "var(--toggle-icon-clr)" }}
+          onClick={toggleTheme}
+        >
+          {theme === "light" ? "🌙 Switch to Dark Mode" : "☀️ Switch to Light Mode"}
+        </button>
+
         <button className="nav-mobile-logout" onClick={logout}>↩ Logout</button>
       </div>
     </nav>
