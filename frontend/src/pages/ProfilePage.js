@@ -3,18 +3,17 @@ import { Link } from "react-router-dom"
 import API from "../services/api"
 import "../styles/styles.css"
 
-const BASE_URL = process.env.REACT_APP_API_URL
-  ? process.env.REACT_APP_API_URL.replace("/api", "")
-  : "http://localhost:5000"
-
 function ProfilePage() {
   const [user,      setUser]      = useState(null)
   const [resources, setResources] = useState([])
   const [confirmId, setConfirmId] = useState(null)
   const [deleting,  setDeleting]  = useState(false)
+  // FIX: track loading so we don't show "No uploads" while still fetching
   const [loading,   setLoading]   = useState(true)
 
-  useEffect(() => { fetchAll() }, [])
+  useEffect(() => {
+    fetchAll()
+  }, [])
 
   const fetchAll = async () => {
     setLoading(true)
@@ -47,6 +46,7 @@ function ProfilePage() {
   }
 
   const totalDownloads = resources.reduce((sum, r) => sum + (r.downloads || 0), 0)
+  // FIX: guard against user being null during load
   const initials = user?.name ? user.name.trim()[0].toUpperCase() : "?"
 
   return (
@@ -59,6 +59,7 @@ function ProfilePage() {
         <div className="pp-avatar-row">
           <div className="pp-avatar">{initials}</div>
           <div className="pp-name-block">
+            {/* FIX: show skeleton-like text while loading */}
             <div className="pp-name">{user?.name || (loading ? "Loading..." : "Unknown")}</div>
             <div className="pp-email">{user?.email || ""}</div>
           </div>
@@ -80,6 +81,7 @@ function ProfilePage() {
 
         <div className="pp-section-title">My uploaded resources</div>
 
+        {/* FIX: only show empty state after loading is complete */}
         {loading ? (
           <div className="pp-empty">
             <div className="pp-empty-sub">Loading your resources...</div>
@@ -107,7 +109,7 @@ function ProfilePage() {
                 <div className="pp-card-actions">
                   <a
                     className="pp-btn pp-btn-view"
-                    href={`${BASE_URL}/uploads/${r.fileUrl}`}
+                    href={`http://localhost:5000/uploads/${r.fileUrl}`}
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -115,7 +117,7 @@ function ProfilePage() {
                   </a>
                   <a
                     className="pp-btn pp-btn-dl"
-                    href={`${BASE_URL}/api/resources/download/${r._id}`}
+                    href={`http://localhost:5000/api/resources/download/${r._id}`}
                   >
                     ⬇ Download
                   </a>

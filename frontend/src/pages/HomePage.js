@@ -14,11 +14,6 @@ const SORTS    = [
   { value: "title",     label: "A → Z"          },
 ]
 
-// Base URL for direct file access (view link)
-const BASE_URL = process.env.REACT_APP_API_URL
-  ? process.env.REACT_APP_API_URL.replace("/api", "")
-  : "http://localhost:5000"
-
 function HomePage() {
   const [resources,  setResources]  = useState([])
   const [loading,    setLoading]    = useState(true)
@@ -72,6 +67,7 @@ function HomePage() {
     })
   }, [resources, search, subject, type, sort])
 
+  // After rating, update the resource in state without a full refetch
   const handleRated = (resourceId, newAvg, newCount) => {
     setResources(prev => prev.map(r =>
       r._id === resourceId
@@ -182,23 +178,21 @@ function HomePage() {
 
               <div className="hp-card-meta">
                 <span>⬇️ {r.downloads || 0}</span>
+                {/* FIX: safe access — uploadedBy may be null if user was deleted */}
                 <span>👤 {r.uploadedBy?.name || "Unknown"}</span>
               </div>
-
               <div className="hp-card-actions">
-                {/* View — opens file inline in a new tab via GridFS stream */}
                 <a
                   className="hp-btn hp-btn-view"
-                  href={`${BASE_URL}/uploads/${r.fileUrl}`}
+                  href={`http://localhost:5000/uploads/${r.fileUrl}`}
                   target="_blank"
                   rel="noreferrer"
                 >
                   👁 View
                 </a>
-                {/* Download — goes through the API route which increments counter */}
                 <a
                   className="hp-btn hp-btn-dl"
-                  href={`${BASE_URL}/api/resources/download/${r._id}`}
+                  href={`http://localhost:5000/api/resources/download/${r._id}`}
                 >
                   ⬇ Download
                 </a>
