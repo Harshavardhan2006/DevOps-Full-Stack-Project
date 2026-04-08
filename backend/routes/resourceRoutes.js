@@ -1,6 +1,8 @@
-const express = require("express")
-const router = express.Router()
-
+// backend/routes/resourceRoutes.js
+const express  = require("express")
+const router   = express.Router()
+const upload   = require("../config/gridfs")          // ← GridFS multer
+const auth     = require("../middleware/authMiddleware")
 const {
   uploadResource,
   getResources,
@@ -9,19 +11,16 @@ const {
   popularResources,
   rateResource,
   getMyResources,
-  deleteResource
+  deleteResource,
 } = require("../controllers/resourceController")
 
-const { protect } = require("../middleware/authMiddleware")
-const upload = require("../middleware/uploadMiddleware")
-
-router.get("/",                                    getResources)
-router.get("/search",                              searchResources)
-router.get("/popular",                             popularResources)
-router.get("/my",          protect,                getMyResources)
-router.get("/download/:id",                        downloadResource)
-router.post("/upload",     protect, upload.single("file"), uploadResource)
-router.post("/:id/rate",   protect,                rateResource)
-router.delete("/:id",      protect,                deleteResource)
+router.post(  "/",                    auth, upload.single("file"), uploadResource)
+router.get(   "/",                    getResources)
+router.get(   "/search",              searchResources)
+router.get(   "/popular",             popularResources)
+router.get(   "/my",                  auth, getMyResources)
+router.get(   "/download/:id",        auth, downloadResource)
+router.post(  "/rate/:id",            auth, rateResource)
+router.delete("/:id",                 auth, deleteResource)
 
 module.exports = router
