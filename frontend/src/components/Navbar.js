@@ -121,17 +121,17 @@ function Navbar() {
               </div>
 
               <Link to="/profile" className="nav-dd-item" onClick={() => setDdOpen(false)}>
-                <span className="nav-dd-icon">👤</span> My Profile
+                <span className="nav-dd-icon"></span> My Profile
               </Link>
               <Link to="/upload" className="nav-dd-item" onClick={() => setDdOpen(false)}>
-                <span className="nav-dd-icon">📤</span> Upload Resource
+                <span className="nav-dd-icon"></span> Upload Resource
               </Link>
 
               {user?.role === "admin" && (
                 <>
                   <div className="nav-dd-divider" />
                   <Link to="/admin" className="nav-dd-item" onClick={() => setDdOpen(false)}>
-                    <span className="nav-dd-icon">⚙️</span> Admin Dashboard
+                    <span className="nav-dd-icon"></span> Admin Dashboard
                     <span className="nav-dd-admin-badge">Admin</span>
                   </Link>
                 </>
