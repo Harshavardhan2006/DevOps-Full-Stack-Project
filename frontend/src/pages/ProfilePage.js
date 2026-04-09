@@ -3,12 +3,23 @@ import { Link } from "react-router-dom"
 import API from "../services/api"
 import "../styles/styles.css"
 
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api"
+
+const getViewUrl = (fileUrl) => {
+  if (!fileUrl) return "#"
+  const lower = fileUrl.toLowerCase()
+  const isOffice = lower.includes(".doc") || lower.includes(".ppt") || lower.includes(".xls")
+  if (isOffice) {
+    return `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}`
+  }
+  return fileUrl
+}
+
 function ProfilePage() {
   const [user,      setUser]      = useState(null)
   const [resources, setResources] = useState([])
   const [confirmId, setConfirmId] = useState(null)
   const [deleting,  setDeleting]  = useState(false)
-  // FIX: track loading so we don't show "No uploads" while still fetching
   const [loading,   setLoading]   = useState(true)
 
   useEffect(() => {
@@ -46,7 +57,6 @@ function ProfilePage() {
   }
 
   const totalDownloads = resources.reduce((sum, r) => sum + (r.downloads || 0), 0)
-  // FIX: guard against user being null during load
   const initials = user?.name ? user.name.trim()[0].toUpperCase() : "?"
 
   return (
@@ -59,7 +69,6 @@ function ProfilePage() {
         <div className="pp-avatar-row">
           <div className="pp-avatar">{initials}</div>
           <div className="pp-name-block">
-            {/* FIX: show skeleton-like text while loading */}
             <div className="pp-name">{user?.name || (loading ? "Loading..." : "Unknown")}</div>
             <div className="pp-email">{user?.email || ""}</div>
           </div>
@@ -81,7 +90,6 @@ function ProfilePage() {
 
         <div className="pp-section-title">My uploaded resources</div>
 
-        {/* FIX: only show empty state after loading is complete */}
         {loading ? (
           <div className="pp-empty">
             <div className="pp-empty-sub">Loading your resources...</div>
@@ -109,7 +117,7 @@ function ProfilePage() {
                 <div className="pp-card-actions">
                   <a
                     className="pp-btn pp-btn-view"
-                    href={r.fileUrl}
+                    href={getViewUrl(r.fileUrl)}
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -117,7 +125,7 @@ function ProfilePage() {
                   </a>
                   <a
                     className="pp-btn pp-btn-dl"
-                    href={`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/resources/download/${r._id}`}
+                    href={`${API_BASE}/resources/download/${r._id}`}
                   >
                     ⬇ Download
                   </a>

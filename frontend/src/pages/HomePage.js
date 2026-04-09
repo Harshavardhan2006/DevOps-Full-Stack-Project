@@ -4,6 +4,19 @@ import { StarDisplay } from "../components/StarRating"
 import StarRating from "../components/StarRating"
 import "../styles/styles.css"
 
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api"
+
+// PDFs open directly in browser, Office files go through Google Docs viewer
+const getViewUrl = (fileUrl) => {
+  if (!fileUrl) return "#"
+  const lower = fileUrl.toLowerCase()
+  const isOffice = lower.includes(".doc") || lower.includes(".ppt") || lower.includes(".xls")
+  if (isOffice) {
+    return `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}`
+  }
+  return fileUrl
+}
+
 const SUBJECTS = ["All","Data Structures","Operating Systems","Algorithms","Computer Networks","Database Systems","Software Engineering","Artificial Intelligence"]
 const TYPES    = ["All","Notes","Assignment","Question Paper"]
 const SORTS    = [
@@ -67,7 +80,6 @@ function HomePage() {
     })
   }, [resources, search, subject, type, sort])
 
-  // After rating, update the resource in state without a full refetch
   const handleRated = (resourceId, newAvg, newCount) => {
     setResources(prev => prev.map(r =>
       r._id === resourceId
@@ -178,13 +190,12 @@ function HomePage() {
 
               <div className="hp-card-meta">
                 <span>⬇️ {r.downloads || 0}</span>
-                {/* FIX: safe access — uploadedBy may be null if user was deleted */}
                 <span>👤 {r.uploadedBy?.name || "Unknown"}</span>
               </div>
               <div className="hp-card-actions">
                 <a
                   className="hp-btn hp-btn-view"
-                  href={r.fileUrl}
+                  href={getViewUrl(r.fileUrl)}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -192,7 +203,7 @@ function HomePage() {
                 </a>
                 <a
                   className="hp-btn hp-btn-dl"
-                  href={`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/resources/download/${r._id}`}
+                  href={`${API_BASE}/resources/download/${r._id}`}
                 >
                   ⬇ Download
                 </a>
