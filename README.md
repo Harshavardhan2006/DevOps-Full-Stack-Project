@@ -1,4 +1,4 @@
-# 🌐 [Live Website](https://student-resource-platform-neon.vercel.app/)
+# [Live Website](https://student-resource-platform-neon.vercel.app/)
 
 # Student Resource Sharing Platform
 
@@ -6,7 +6,7 @@ A full-stack web application for students to share, discover, and rate academic 
 
 ---
 
-## 🚀 Features
+##  Features
 
 - **Resource Hub:** Upload, download, and rate notes, assignments, and question papers.
 - **Smart Search & Filters:** Find resources by subject, type, or popularity.
@@ -18,7 +18,7 @@ A full-stack web application for students to share, discover, and rate academic 
 
 ---
 
-## 🗂️ Project Structure
+##  Project Structure
 
 ```
 SudentResourcePlatform/
@@ -45,7 +45,7 @@ SudentResourcePlatform/
 
 ---
 
-## ⚙️ Backend (Node.js/Express)
+##  Backend (Node.js/Express)
 
 - RESTful API for authentication, resource management, and admin operations
 - MongoDB with Mongoose for data storage
@@ -65,7 +65,7 @@ SudentResourcePlatform/
 
 ---
 
-## 💻 Frontend (React)
+##  Frontend (React)
 
 - Modern SPA using React, React Router, and Axios
 - Pages: Landing, Home, Login, Register, Profile, Upload, Admin Dashboard
@@ -74,7 +74,7 @@ SudentResourcePlatform/
 
 ---
 
-## 🛠️ DevOps & CI/CD
+##  DevOps & CI/CD
 
 - **GitHub Actions:** Automated build, test, and deploy pipelines
 - **Jest:** Automated testing for backend and frontend
@@ -83,7 +83,7 @@ SudentResourcePlatform/
 
 ---
 
-## 📦 Dependencies
+##  Dependencies
 
 **Backend:**
 
