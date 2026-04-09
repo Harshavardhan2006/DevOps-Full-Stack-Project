@@ -37,11 +37,6 @@ function LandingPage() {
     },
   ]
 
-  const subjects = [
-    "Data Structures", "Algorithms", "Operating Systems",
-    "Computer Networks", "Database Systems", "Software Engineering", "Artificial Intelligence",
-  ]
-
   const stats = [
     { value: "7+",   label: "Subjects Covered" },
     { value: "3",    label: "Resource Types" },
@@ -128,19 +123,6 @@ function LandingPage() {
                 <h3 className="land-feature-title">{f.title}</h3>
                 <p className="land-feature-desc">{f.desc}</p>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── SUBJECTS ── */}
-      <section className="land-subjects-section">
-        <div className="land-section-inner">
-          <div className="land-section-label">Subjects</div>
-          <h2 className="land-section-title">Core CS subjects covered</h2>
-          <div className="land-subjects-wrap">
-            {subjects.map(s => (
-              <div className="land-subject-pill" key={s}>{s}</div>
             ))}
           </div>
         </div>
