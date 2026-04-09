@@ -1,4 +1,5 @@
 const Resource = require("../models/Resource")
+const cloudinary = require("../config/cloudinary")
 
 exports.uploadResource = async (req, res) => {
 
@@ -15,11 +16,10 @@ exports.uploadResource = async (req, res) => {
       description,
       subject,
       type,
-      fileUrl: req.file.filename,
+      fileUrl:    req.file.path,
+      publicId:   req.file.filename,
       uploadedBy: req.user.id
     })
-
-    console.log("Resource saved:", resource)
 
     res.json(resource)
 
@@ -51,19 +51,12 @@ exports.searchResources = async (req, res) => {
   try {
 
     const { title, subject } = req.query
-
     let query = {}
 
-    if (title) {
-      query.title = { $regex: title, $options: "i" }
-    }
-
-    if (subject) {
-      query.subject = { $regex: subject, $options: "i" }
-    }
+    if (title)   query.title   = { $regex: title,   $options: "i" }
+    if (subject) query.subject = { $regex: subject, $options: "i" }
 
     const resources = await Resource.find(query)
-
     res.json(resources)
 
   } catch (error) {
@@ -86,7 +79,8 @@ exports.downloadResource = async (req, res) => {
     resource.downloads += 1
     await resource.save()
 
-    res.download(`uploads/${resource.fileUrl}`)
+    // Redirect to Cloudinary URL — browser handles the download
+    res.redirect(resource.fileUrl)
 
   } catch (error) {
     console.log(error)
@@ -162,10 +156,7 @@ exports.getMyResources = async (req, res) => {
 
   try {
 
-    const resources = await Resource.find({
-      uploadedBy: req.user.id
-    })
-
+    const resources = await Resource.find({ uploadedBy: req.user.id })
     res.json(resources)
 
   } catch (error) {
@@ -185,12 +176,18 @@ exports.deleteResource = async (req, res) => {
       return res.status(404).json({ message: "Resource not found" })
     }
 
-    // Admins can delete any resource; students can only delete their own
     const isAdmin = req.user.role === "admin"
     const isOwner = resource.uploadedBy.toString() === req.user.id.toString()
 
     if (!isAdmin && !isOwner) {
       return res.status(403).json({ message: "Not authorized" })
+    }
+
+    // Delete file from Cloudinary when resource is deleted
+    if (resource.publicId) {
+      await cloudinary.uploader.destroy(resource.publicId, {
+        resource_type: "raw"
+      })
     }
 
     await resource.deleteOne()

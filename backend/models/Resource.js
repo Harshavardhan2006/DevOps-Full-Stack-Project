@@ -2,16 +2,42 @@ const mongoose = require("mongoose")
 
 const resourceSchema = new mongoose.Schema({
 
-  title:       String,
-  description: String,
-  subject:     String,
-  type:        String,
+  title: {
+    type: String,
+    required: true,
+    trim: true
+  },
 
-  fileUrl: String,
+  description: {
+    type: String,
+    trim: true
+  },
+
+  subject: {
+    type: String,
+    required: true
+  },
+
+  type: {
+    type: String,
+    enum: ["Notes", "Assignment", "Question Paper"],
+    required: true
+  },
+
+  fileUrl: {
+    type: String,
+    required: true
+  },
+
+  publicId: {
+    type: String,
+    default: ""
+  },
 
   uploadedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
+    ref: "User",
+    required: true
   },
 
   downloads: {
@@ -19,7 +45,6 @@ const resourceSchema = new mongoose.Schema({
     default: 0
   },
 
-  // Replaced old rating + numReviews with a proper ratings array
   ratings: [
     {
       user:  { type: mongoose.Schema.Types.ObjectId, ref: "User" },

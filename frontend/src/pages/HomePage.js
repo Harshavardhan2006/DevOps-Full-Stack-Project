@@ -81,7 +81,7 @@ function HomePage() {
     <div className="hp-root">
 
       <div className="hp-hero">
-        <div className="hp-hero-badge">Open Knowledge Hub</div>
+        <div className="hp-hero-badge">📚 Open Knowledge Hub</div>
         <h1>Knowledge grows when shared, and shines brightest when accessible to all.</h1>
         <p>Browse, preview, and download study resources across all core CS subjects.</p>
       </div>
@@ -184,7 +184,7 @@ function HomePage() {
               <div className="hp-card-actions">
                 <a
                   className="hp-btn hp-btn-view"
-                  href={`http://localhost:5000/uploads/${r.fileUrl}`}
+                  href={r.fileUrl}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -192,7 +192,7 @@ function HomePage() {
                 </a>
                 <a
                   className="hp-btn hp-btn-dl"
-                  href={`http://localhost:5000/api/resources/download/${r._id}`}
+                  href={`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/resources/download/${r._id}`}
                 >
                   ⬇ Download
                 </a>

@@ -1,6 +1,6 @@
-const express = require("express")
-const router = express.Router()
-
+const express     = require("express")
+const multer      = require("multer")
+const { protect } = require("../middleware/authMiddleware")
 const {
   uploadResource,
   getResources,
@@ -12,16 +12,18 @@ const {
   deleteResource
 } = require("../controllers/resourceController")
 
-const { protect } = require("../middleware/authMiddleware")
-const upload = require("../middleware/uploadMiddleware")
+const { storage } = require("../config/cloudinary")
+const upload = multer({ storage })
 
-router.get("/",                                    getResources)
-router.get("/search",                              searchResources)
-router.get("/popular",                             popularResources)
-router.get("/my",          protect,                getMyResources)
-router.get("/download/:id",                        downloadResource)
-router.post("/upload",     protect, upload.single("file"), uploadResource)
-router.post("/:id/rate",   protect,                rateResource)
-router.delete("/:id",      protect,                deleteResource)
+const router = express.Router()
+
+router.get("/",             protect, getResources)
+router.get("/search",       protect, searchResources)
+router.get("/popular",      protect, popularResources)
+router.get("/my",           protect, getMyResources)
+router.get("/download/:id", protect, downloadResource)
+router.post("/upload",      protect, upload.single("file"), uploadResource)
+router.post("/:id/rate",    protect, rateResource)
+router.delete("/:id",       protect, deleteResource)
 
 module.exports = router

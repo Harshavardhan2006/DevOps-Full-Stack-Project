@@ -109,7 +109,7 @@ function ProfilePage() {
                 <div className="pp-card-actions">
                   <a
                     className="pp-btn pp-btn-view"
-                    href={`http://localhost:5000/uploads/${r.fileUrl}`}
+                    href={r.fileUrl}
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -117,7 +117,7 @@ function ProfilePage() {
                   </a>
                   <a
                     className="pp-btn pp-btn-dl"
-                    href={`http://localhost:5000/api/resources/download/${r._id}`}
+                    href={`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/resources/download/${r._id}`}
                   >
                     ⬇ Download
                   </a>
