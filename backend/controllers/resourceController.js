@@ -81,22 +81,22 @@ exports.downloadResource = async (req, res) => {
     resource.downloads += 1
     await resource.save()
 
-    // Build a Cloudinary URL that forces download with the original filename
-    const ext = resource.originalFilename
-      ? path.extname(resource.originalFilename)
-      : ""
+    // Fetch the file from Cloudinary and stream it to the client
+    // This avoids all Cloudinary URL transformation issues
+    const https = require("https")
+    const url   = resource.fileUrl
 
-    const filename = resource.originalFilename || `download${ext}`
+    const filename = resource.originalFilename || path.basename(url)
 
-    // For raw files (docx, pdf, ppt etc.) add fl_attachment to force download
-    const downloadUrl = resource.fileUrl.includes("/raw/upload/")
-      ? resource.fileUrl.replace(
-          "/raw/upload/",
-          `/raw/upload/fl_attachment:${filename.replace(/\s+/g, "_")}/`
-        )
-      : resource.fileUrl
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`)
+    res.setHeader("Content-Type", "application/octet-stream")
 
-    res.redirect(downloadUrl)
+    https.get(url, (stream) => {
+      stream.pipe(res)
+    }).on("error", (err) => {
+      console.log("Download stream error:", err)
+      res.status(500).json({ message: "Download failed" })
+    })
 
   } catch (error) {
     console.log(error)
@@ -199,7 +199,6 @@ exports.deleteResource = async (req, res) => {
       return res.status(403).json({ message: "Not authorized" })
     }
 
-    // Detect resource_type from the stored URL to delete correctly from Cloudinary
     if (resource.publicId) {
       const resourceType = resource.fileUrl.includes("/image/upload/") ? "image" : "raw"
       await cloudinary.uploader.destroy(resource.publicId, { resource_type: resourceType })
