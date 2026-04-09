@@ -1,5 +1,6 @@
 const Resource = require("../models/Resource")
-const cloudinary = require("../config/cloudinary")
+const { cloudinary } = require("../config/cloudinary")
+const path = require("path")
 
 exports.uploadResource = async (req, res) => {
 
@@ -16,9 +17,10 @@ exports.uploadResource = async (req, res) => {
       description,
       subject,
       type,
-      fileUrl:    req.file.path,
-      publicId:   req.file.filename,
-      uploadedBy: req.user.id
+      fileUrl:          req.file.path,
+      publicId:         req.file.filename,
+      originalFilename: req.file.originalname,
+      uploadedBy:       req.user.id
     })
 
     res.json(resource)
@@ -79,8 +81,22 @@ exports.downloadResource = async (req, res) => {
     resource.downloads += 1
     await resource.save()
 
-    // Redirect to Cloudinary URL — browser handles the download
-    res.redirect(resource.fileUrl)
+    // Build a Cloudinary URL that forces download with the original filename
+    const ext = resource.originalFilename
+      ? path.extname(resource.originalFilename)
+      : ""
+
+    const filename = resource.originalFilename || `download${ext}`
+
+    // For raw files (docx, pdf, ppt etc.) add fl_attachment to force download
+    const downloadUrl = resource.fileUrl.includes("/raw/upload/")
+      ? resource.fileUrl.replace(
+          "/raw/upload/",
+          `/raw/upload/fl_attachment:${filename.replace(/\s+/g, "_")}/`
+        )
+      : resource.fileUrl
+
+    res.redirect(downloadUrl)
 
   } catch (error) {
     console.log(error)
@@ -183,11 +199,10 @@ exports.deleteResource = async (req, res) => {
       return res.status(403).json({ message: "Not authorized" })
     }
 
-    // Delete file from Cloudinary when resource is deleted
+    // Detect resource_type from the stored URL to delete correctly from Cloudinary
     if (resource.publicId) {
-      await cloudinary.uploader.destroy(resource.publicId, {
-        resource_type: "raw"
-      })
+      const resourceType = resource.fileUrl.includes("/image/upload/") ? "image" : "raw"
+      await cloudinary.uploader.destroy(resource.publicId, { resource_type: resourceType })
     }
 
     await resource.deleteOne()

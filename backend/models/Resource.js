@@ -34,6 +34,12 @@ const resourceSchema = new mongoose.Schema({
     default: ""
   },
 
+  // Original filename for proper download naming
+  originalFilename: {
+    type: String,
+    default: ""
+  },
+
   uploadedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
