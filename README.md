@@ -1,3 +1,5 @@
+# 🌐 [Live Website](https://student-resource-platform-neon.vercel.app/)
+
 # Student Resource Sharing Platform
 
 A full-stack web application for students to share, discover, and rate academic resources. Built with a modern React frontend and a Node.js/Express backend, this project demonstrates DevOps best practices, CI/CD, and scalable architecture.
@@ -63,14 +65,12 @@ SudentResourcePlatform/
 
 ---
 
-
 ## 💻 Frontend (React)
 
 - Modern SPA using React, React Router, and Axios
 - Pages: Landing, Home, Login, Register, Profile, Upload, Admin Dashboard
 - Responsive design with custom CSS
 - API integration with backend
-
 
 ---
 
