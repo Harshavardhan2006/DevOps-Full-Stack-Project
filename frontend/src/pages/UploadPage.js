@@ -1,7 +1,60 @@
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import API from "../services/api"
 import "../styles/styles.css"
+
+const SUBJECTS = [
+  "Data Structures",
+  "Operating Systems",
+  "Algorithms",
+  "Computer Networks",
+  "Database Systems",
+  "Software Engineering",
+  "Artificial Intelligence",
+]
+
+const TYPES = ["Notes", "Assignment", "Question Paper"]
+
+function CustomSelect({ value, onChange, options, placeholder, icon }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
+  }, [])
+
+  return (
+    <div className="up-custom-select" ref={ref}>
+      <div
+        className={`up-custom-select-trigger${open ? " open" : ""}${value ? " selected" : ""}`}
+        onClick={() => setOpen(!open)}
+      >
+        <span className="up-input-icon">{icon}</span>
+        <span className="up-custom-select-value">
+          {value || placeholder}
+        </span>
+        <span className="up-custom-select-arrow">▾</span>
+      </div>
+      {open && (
+        <div className="up-custom-select-dropdown">
+          {options.map(opt => (
+            <div
+              key={opt}
+              className={`up-custom-select-option${value === opt ? " active" : ""}`}
+              onClick={() => { onChange(opt); setOpen(false) }}
+            >
+              {opt}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function UploadPage() {
   const [title,       setTitle]       = useState("")
@@ -18,11 +71,9 @@ function UploadPage() {
   const handleUpload = async (e) => {
     e.preventDefault()
 
-    // FIX: validate file is selected before submitting
-    if (!file) {
-      setError("Please select a file to upload.")
-      return
-    }
+    if (!subject) { setError("Please select a subject."); return }
+    if (!type)    { setError("Please select a resource type."); return }
+    if (!file)    { setError("Please select a file to upload."); return }
 
     setLoading(true)
     setError("")
@@ -36,8 +87,6 @@ function UploadPage() {
       formData.append("file",        file)
 
       await API.post("/resources/upload", formData)
-
-      // FIX: navigate to /home not / (which is the landing page)
       navigate("/home")
 
     } catch (err) {
@@ -100,42 +149,24 @@ function UploadPage() {
           <div className="up-row">
             <div className="up-field">
               <label className="up-label">Subject</label>
-              <div className="up-input-wrap">
-                <span className="up-input-icon">📚</span>
-                <select
-                  className="up-select"
-                  value={subject}
-                  onChange={e => setSubject(e.target.value)}
-                  required
-                >
-                  <option value="">Select subject</option>
-                  <option>Data Structures</option>
-                  <option>Operating Systems</option>
-                  <option>Algorithms</option>
-                  <option>Computer Networks</option>
-                  <option>Database Systems</option>
-                  <option>Software Engineering</option>
-                  <option>Artificial Intelligence</option>
-                </select>
-              </div>
+              <CustomSelect
+                value={subject}
+                onChange={setSubject}
+                options={SUBJECTS}
+                placeholder="Select subject"
+                icon="📚"
+              />
             </div>
 
             <div className="up-field">
               <label className="up-label">Resource type</label>
-              <div className="up-input-wrap">
-                <span className="up-input-icon">🗂</span>
-                <select
-                  className="up-select"
-                  value={type}
-                  onChange={e => setType(e.target.value)}
-                  required
-                >
-                  <option value="">Select type</option>
-                  <option>Notes</option>
-                  <option>Assignment</option>
-                  <option>Question Paper</option>
-                </select>
-              </div>
+              <CustomSelect
+                value={type}
+                onChange={setType}
+                options={TYPES}
+                placeholder="Select type"
+                icon="🗂"
+              />
             </div>
           </div>
 
