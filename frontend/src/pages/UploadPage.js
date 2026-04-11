@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import API from "../services/api"
 import "../styles/styles.css"
 
-const SUBJECTS = [
+const DEFAULT_SUBJECTS = [
   "Data Structures",
   "Operating Systems",
   "Algorithms",
@@ -15,7 +15,119 @@ const SUBJECTS = [
 
 const TYPES = ["Notes", "Assignment", "Question Paper"]
 
-function CustomSelect({ value, onChange, options, placeholder, icon }) {
+// Subject selector with "Add custom" option
+function SubjectSelect({ value, onChange }) {
+  const [open,        setOpen]        = useState(false)
+  const [customMode,  setCustomMode]  = useState(false)
+  const [customInput, setCustomInput] = useState("")
+  const ref      = useRef(null)
+  const inputRef = useRef(null)
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setOpen(false)
+        setCustomMode(false)
+        setCustomInput("")
+      }
+    }
+    document.addEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
+  }, [])
+
+  useEffect(() => {
+    if (customMode && inputRef.current) inputRef.current.focus()
+  }, [customMode])
+
+  const handleCustomSubmit = () => {
+    const trimmed = customInput.trim()
+    if (!trimmed) return
+    // Capitalise first letter of each word
+    const formatted = trimmed.replace(/\b\w/g, c => c.toUpperCase())
+    onChange(formatted)
+    setOpen(false)
+    setCustomMode(false)
+    setCustomInput("")
+  }
+
+  const isCustomValue = value && !DEFAULT_SUBJECTS.includes(value)
+
+  return (
+    <div className="up-custom-select" ref={ref}>
+      <div
+        className={`up-custom-select-trigger${open ? " open" : ""}${value ? " selected" : ""}`}
+        onClick={() => { setOpen(!open); setCustomMode(false) }}
+      >
+        <span className="up-input-icon">📚</span>
+        <span className="up-custom-select-value">
+          {value || "Select subject"}
+          {isCustomValue && <span className="up-custom-badge">custom</span>}
+        </span>
+        <span className="up-custom-select-arrow">▾</span>
+      </div>
+
+      {open && (
+        <div className="up-custom-select-dropdown">
+          {!customMode ? (
+            <>
+              {DEFAULT_SUBJECTS.map(opt => (
+                <div
+                  key={opt}
+                  className={`up-custom-select-option${value === opt ? " active" : ""}`}
+                  onClick={() => { onChange(opt); setOpen(false) }}
+                >
+                  {opt}
+                </div>
+              ))}
+              <div className="up-custom-select-divider" />
+              <div
+                className="up-custom-select-option up-custom-select-add"
+                onClick={() => setCustomMode(true)}
+              >
+                <span>➕</span> Add custom subject
+              </div>
+            </>
+          ) : (
+            <div className="up-custom-input-wrap">
+              <input
+                ref={inputRef}
+                className="up-custom-input"
+                type="text"
+                placeholder="e.g. Computer Graphics"
+                value={customInput}
+                onChange={e => setCustomInput(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === "Enter") { e.preventDefault(); handleCustomSubmit() }
+                  if (e.key === "Escape") { setCustomMode(false); setCustomInput("") }
+                }}
+              />
+              <div className="up-custom-input-actions">
+                <button
+                  type="button"
+                  className="up-custom-input-cancel"
+                  onClick={() => { setCustomMode(false); setCustomInput("") }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="up-custom-input-confirm"
+                  onClick={handleCustomSubmit}
+                  disabled={!customInput.trim()}
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Regular custom select for resource type
+function TypeSelect({ value, onChange }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
@@ -33,15 +145,13 @@ function CustomSelect({ value, onChange, options, placeholder, icon }) {
         className={`up-custom-select-trigger${open ? " open" : ""}${value ? " selected" : ""}`}
         onClick={() => setOpen(!open)}
       >
-        <span className="up-input-icon">{icon}</span>
-        <span className="up-custom-select-value">
-          {value || placeholder}
-        </span>
+        <span className="up-input-icon">🗂</span>
+        <span className="up-custom-select-value">{value || "Select type"}</span>
         <span className="up-custom-select-arrow">▾</span>
       </div>
       {open && (
         <div className="up-custom-select-dropdown">
-          {options.map(opt => (
+          {TYPES.map(opt => (
             <div
               key={opt}
               className={`up-custom-select-option${value === opt ? " active" : ""}`}
@@ -71,7 +181,7 @@ function UploadPage() {
   const handleUpload = async (e) => {
     e.preventDefault()
 
-    if (!subject) { setError("Please select a subject."); return }
+    if (!subject) { setError("Please select or add a subject."); return }
     if (!type)    { setError("Please select a resource type."); return }
     if (!file)    { setError("Please select a file to upload."); return }
 
@@ -149,24 +259,12 @@ function UploadPage() {
           <div className="up-row">
             <div className="up-field">
               <label className="up-label">Subject</label>
-              <CustomSelect
-                value={subject}
-                onChange={setSubject}
-                options={SUBJECTS}
-                placeholder="Select subject"
-                icon="📚"
-              />
+              <SubjectSelect value={subject} onChange={setSubject} />
             </div>
 
             <div className="up-field">
               <label className="up-label">Resource type</label>
-              <CustomSelect
-                value={type}
-                onChange={setType}
-                options={TYPES}
-                placeholder="Select type"
-                icon="🗂"
-              />
+              <TypeSelect value={type} onChange={setType} />
             </div>
           </div>
 

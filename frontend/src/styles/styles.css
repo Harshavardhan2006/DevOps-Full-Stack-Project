@@ -1390,3 +1390,138 @@ tr:hover td      { background: var(--tr-hover); }
   border-color: rgba(220,38,38,0.25);
   color: #f87171;
 }
+
+
+/* ============================================================
+   CUSTOM SUBJECT INPUT — paste after .up-custom-select-option rules
+   ============================================================ */
+
+.up-custom-select-divider {
+  height: 1px;
+  background: rgba(0,0,0,0.08);
+  margin: 4px 0;
+}
+
+.up-custom-select-add {
+  color: #4f76f7 !important;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.up-custom-select-add:hover {
+  background: #eef1fd !important;
+  color: #4f76f7 !important;
+}
+
+.up-custom-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  background: rgba(79,118,247,0.12);
+  color: #4f76f7;
+  padding: 2px 6px;
+  border-radius: 999px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.up-custom-input-wrap {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.up-custom-input {
+  width: 100%;
+  padding: 9px 12px;
+  background: #f5f7fa;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 7px;
+  color: #1a1f2e;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.up-custom-input:focus {
+  border-color: #4f76f7;
+  box-shadow: 0 0 0 3px rgba(79,118,247,0.1);
+}
+
+.up-custom-input::placeholder { color: #c0c6d4; }
+
+.up-custom-input-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.up-custom-input-cancel {
+  flex: 1;
+  padding: 7px;
+  background: #f5f7fa;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 7px;
+  color: #5a6278;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.up-custom-input-cancel:hover { background: #e5e7eb; }
+
+.up-custom-input-confirm {
+  flex: 1;
+  padding: 7px;
+  background: #4f76f7;
+  border: none;
+  border-radius: 7px;
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.up-custom-input-confirm:hover    { opacity: 0.88; }
+.up-custom-input-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Dark theme overrides */
+[data-theme="dark"] .up-custom-select-divider { background: rgba(255,255,255,0.08); }
+
+[data-theme="dark"] .up-custom-select-add       { color: #4f8ef7 !important; }
+[data-theme="dark"] .up-custom-select-add:hover { background: rgba(79,142,247,0.1) !important; }
+
+[data-theme="dark"] .up-custom-badge {
+  background: rgba(79,142,247,0.15);
+  color: #4f8ef7;
+}
+
+[data-theme="dark"] .up-custom-input {
+  background: #0d1117;
+  border-color: rgba(255,255,255,0.1);
+  color: #e6edf3;
+}
+
+[data-theme="dark"] .up-custom-input:focus {
+  border-color: #4f8ef7;
+  box-shadow: 0 0 0 3px rgba(79,142,247,0.12);
+}
+
+[data-theme="dark"] .up-custom-input::placeholder { color: #484f58; }
+
+[data-theme="dark"] .up-custom-input-cancel {
+  background: #1c2333;
+  border-color: rgba(255,255,255,0.1);
+  color: #8b949e;
+}
+
+[data-theme="dark"] .up-custom-input-cancel:hover { background: #2d3748; }

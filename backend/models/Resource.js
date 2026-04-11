@@ -13,9 +13,11 @@ const resourceSchema = new mongoose.Schema({
     trim: true
   },
 
+  // Free text — no enum so users can add custom subjects
   subject: {
     type: String,
-    required: true
+    required: true,
+    trim: true
   },
 
   type: {
@@ -34,7 +36,6 @@ const resourceSchema = new mongoose.Schema({
     default: ""
   },
 
-  // Original filename for proper download naming
   originalFilename: {
     type: String,
     default: ""

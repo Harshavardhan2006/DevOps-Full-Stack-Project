@@ -6,20 +6,16 @@ import "../styles/styles.css"
 
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api"
 
-// PDFs open directly in browser, Office files go through Google Docs viewer
 const getViewUrl = (fileUrl) => {
   if (!fileUrl) return "#"
   const lower = fileUrl.toLowerCase()
   const isOffice = lower.includes(".doc") || lower.includes(".ppt") || lower.includes(".xls")
-  if (isOffice) {
-    return `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}`
-  }
+  if (isOffice) return `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}`
   return fileUrl
 }
 
-const SUBJECTS = ["All","Data Structures","Operating Systems","Algorithms","Computer Networks","Database Systems","Software Engineering","Artificial Intelligence"]
-const TYPES    = ["All","Notes","Assignment","Question Paper"]
-const SORTS    = [
+const TYPES = ["All", "Notes", "Assignment", "Question Paper"]
+const SORTS = [
   { value: "newest",    label: "Newest first"   },
   { value: "oldest",    label: "Oldest first"   },
   { value: "downloads", label: "Most downloaded" },
@@ -49,6 +45,17 @@ function HomePage() {
       setLoading(false)
     }
   }
+
+  // Build subject list dynamically from actual resources — includes any custom subjects
+  const allSubjects = useMemo(() => {
+    const fromResources = resources.map(r => r.subject).filter(Boolean)
+    const unique = ["All", ...new Set(fromResources)].sort((a, b) => {
+      if (a === "All") return -1
+      if (b === "All") return  1
+      return a.localeCompare(b)
+    })
+    return unique
+  }, [resources])
 
   const hasFilters = search || subject !== "All" || type !== "All" || sort !== "newest"
 
@@ -119,7 +126,7 @@ function HomePage() {
           <div className="hp-filter-row">
             <span className="hp-filter-label">Subject</span>
             <div className="hp-filter-chips">
-              {SUBJECTS.map(s => (
+              {allSubjects.map(s => (
                 <button
                   key={s}
                   className={`hp-chip${subject === s ? " active" : ""}`}
